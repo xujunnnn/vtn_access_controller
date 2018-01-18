@@ -1,0 +1,35 @@
+module mac_acl{
+    yang-version 1;
+    namespace "urn:opendaylight:mac_acl";
+    prefix acldata;
+    import mac_acl_sub{
+    	prefix acl;
+    	revision-date 2017-12-12;
+    }
+    
+    
+    
+    container mac_acls{
+    	 description
+             "The root container of all VTNs (Virtual Tenant Network).
+              Note that the VTN configuration must be modified by RPC.
+              Do not edit this container directly.";
+
+           config false;
+           list mac_acl {
+               description
+                 "VTN is a virtual network environment that gets created inside
+                  the OpenDaylight controller. The VTN Manager manages the
+                  virtual network at VTN level. At least one VTN should be
+                  created for setting up virtual network using the VTN Manager.";
+               key "vtn";
+               leaf vtn{
+            	   type string;
+               }
+               leaf vbridge{
+            	   type string;
+               }
+              
+           }
+    }
+}

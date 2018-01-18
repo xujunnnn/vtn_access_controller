@@ -1,0 +1,400 @@
+/*
+ * Copyright (c) 2015-2016 NEC Corporation
+ * All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this
+ * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+module mac_acl_type {
+    yang-version 1;
+    namespace "urn:opendaylight:mac_acl:types";
+    prefix type;
+
+    /* OpenDaylight controller */
+    import opendaylight-inventory {
+        prefix inv;
+        revision-date 2013-08-19;
+    }
+
+    /* OpenDaylight MD-SAL */
+    import opendaylight-l2-types {
+        prefix l2;
+        revision-date 2013-08-27;
+    }
+    import ietf-yang-types {
+        prefix yang;
+        revision-date 2013-07-15;
+    }
+
+    description
+      "The module that descripes various data types used by the VTN Manager.";
+
+    revision 2017-12-12 {
+        description "Initial revision.";
+    }
+
+
+   
+    grouping path-fields {
+        description
+          "Describes a set of fields which specify the location of the
+           virtual node inside the VTN.";
+
+        leaf tenant-name {
+            description "The name of the VTN.";
+            type string;
+        }
+
+        leaf bridge-name {
+            description
+              "The name of the vBridge.
+               This field is omitted if the virtual node specified by this
+               model is neither a vBridge nor a virtual node attached to the
+               vBridge.";
+            type string;
+        }
+
+        leaf router-name {
+            description
+              "The name of the vRouter.
+               Currently the VTN Manager never uses this field because the
+               virtual router is not yet supported.";
+            type string;
+        }
+
+        leaf terminal-name {
+            description
+              "The name of the vTerminal.
+               This field is ignored if `bridge-name' field is configured.
+               This field is omitted if the virtual node specified by this
+               model is neither a vTerminal nor a virtual node attached to
+               the vTerminal.";
+            type string;
+        }
+
+        leaf interface-name {
+            description
+              "The name of the virtual interface.
+
+               - If the virtual interface specified by this model is attached
+                 to a vBridge, the name of the vBridge is set to `bridge-name'
+                 field.
+               - If the virtual interface specified by this model is attached
+                 to a vTerminal, the name of the vTerminal is set to
+                 `terminal-name' field.
+               - This field is omitted if the virtual node specified by this
+                 model is not a virtual interface.";
+            type string;
+        }
+    }
+
+    typedef state {
+        description "Describes the state of the virtual node in the VTN.";
+
+        type enumeration {
+            enum UNKNOWN {
+                description
+                  "Indicates the state of the virtual node is unavailable.";
+                value -1;
+            }
+
+            enum DOWN {
+                description "Indicates the virtual node is in down state.";
+                value 0;
+            }
+
+            enum UP {
+                description "Indicates the virtual node is in up state.";
+                value 1;
+            }
+        }
+    }
+
+    typedef update-mode {
+        description "Describes how to update a virtual node.";
+
+        type enumeration {
+            enum UPDATE {
+                description
+                  "Indicates that the specified virtual node needs to be
+                   created if it is not present. The specified virtual node
+                   will be modified if it is present.";
+                value 0;
+            }
+
+            enum CREATE {
+                description
+                  "Indicates that a new virtual node needs to be created.
+                   Operation will fail if the specified virtual node is
+                   present.";
+                value 1;
+            }
+
+            enum MODIFY {
+                description
+                  "Indicates that existing virtual node needs to be modified.
+                   Operation will fail if the specified virtual node is not
+                   present.";
+                value 2;
+            }
+        }
+    }
+
+    typedef update-type {
+        description
+          "Describes the result of the operation that updates the
+           configuration.";
+
+        type enumeration {
+            enum CREATED {
+                description
+                  "Indicates one or more resources have been successfully
+                   created.";
+                value 0;
+            }
+            enum REMOVED {
+                description
+                  "Indicates one or more resources have been successfully
+                   removed.";
+                value 1;
+            }
+            enum CHANGED {
+                description
+                  "Indicates one or more resources have been successfully
+                   changed.";
+                value 2;
+            }
+        }
+    }
+
+    typedef error-tag {
+        description
+          "Describes the generic error conditions.
+           VTN RPC will set one of below values as a string into
+           application tag in RPC error when it fails.";
+
+        type enumeration {
+            enum BADREQUEST {
+                description "Indicates RPC input contains invalid data.";
+                value 0;
+            }
+
+            enum UNAUTHORIZED {
+                description "Indicates the request is not authorized.";
+                value 1;
+            }
+
+            enum NOTFOUND {
+                description "Indicates the specified resource was not found.";
+                value 2;
+            }
+
+            enum NOTACCEPTABLE {
+                description
+                  "Indicates the specified request is not acceptable. ";
+                value 3;
+            }
+
+            enum TIMEOUT {
+                description "Indicates the operation has been timed out.";
+                value 4;
+            }
+
+            enum CONFLICT {
+                description
+                  "Indicates the specified operation will conflict with
+                   existing resource.";
+                value 5;
+            }
+
+            enum GONE {
+                description
+                  "Indicates the specified resource has already gone.";
+                value 6;
+            }
+
+            enum INTERNALERROR {
+                description
+                  "Indicates the operation has been failed due to internal
+                   error.";
+                value 7;
+            }
+
+            enum NOSERVICE {
+                description
+                  "Indicates the VTN Manager service is not available.";
+                value 8;
+            }
+        }
+    }
+
+    grouping rpc-result {
+        description
+          "Describes the generic information of the RPC result.";
+
+        leaf status {
+            description  "Describes the status of the RPC result.";
+            type update-type;
+        }
+    }
+
+    typedef update-operation-type {
+        description "Describes how to update existing resources.";
+
+        type enumeration {
+            enum SET {
+                description
+                  "Indicates that present settings are to be replaced with
+                   the specified contents.";
+                value 0;
+            }
+
+            enum ADD {
+                description
+                  "Indicates that the specified contents are to be added to
+                   the present settings.";
+                value 1;
+            }
+
+            enum REMOVE {
+                description
+                  "Indicates that the specified contents are to be deleted
+                   from the present settings.";
+                value 2;
+            }
+        }
+    }
+
+    typedef acl-type {
+        description "Describes the type of access control list.";
+
+        type enumeration {
+            enum ALLOW {
+                description
+                  "Indicates that user is allowed to access the resource.";
+                value 0;
+            }
+
+            enum DENY {
+                description
+                  "Indicates that user is disallowed to access the resource.";
+                value 1;
+            }
+        }
+    }
+
+    grouping switch-port {
+        description
+          "Describes the location of the physical swtich port.
+
+           This model describes only the information that identifies the port
+           within a physical swtich, and does not describes the information
+           that identifies the physical switch.";
+
+        leaf port-id {
+            description
+              "Identifier for a switch port in the physical switch.
+               To specify the OpenFlow switch port, a string representation
+               of the port number for a physical port needs to be specified.
+
+               If this field is omitted, it is necessary to specify the
+               `port-name' field.";
+            type string;
+        }
+
+        leaf port-name {
+            description
+              "The name of the switch port.
+
+               Note that an empty string cannot be specified as the port name.
+               If this attribute is omitted, it is necessary to specify the
+               `port-id' field.";
+            type string {
+                length "1 .. max";
+            }
+        }
+    }
+
+    grouping host {
+        description
+          "Describes the host in VLAN.
+           A host in VLAN is specified by a pair of MAC address and VLAN ID.";
+
+        leaf mac-address {
+            description "MAC address of the host.";
+            type yang:mac-address;
+        }
+
+    }
+
+    typedef host-desc {
+        description
+          "Describes the host in VLAN.
+           The value must be a pair of MAC address and VLAN ID joined with
+           `@'.
+
+           The first element must be a string representation of MAC
+           address in lower-case hex format (e.g. 00:11:22:33:aa) or an
+           empty string. An empty string implies that the MAC address is
+           not specified.
+
+           The second element must be a string representation of VLAN ID
+           in decimal format. Zero means the untagged Ethernet frame.
+           Note that VLAN ID is mandatory.";
+
+        type string {
+            pattern "([0-9a-f]{2}(:[0-9a-f]{2}){5})?@[0-9]+";
+        }
+    }
+
+    typedef vtn-port-desc {
+        description
+          "Describes the location of the physical switch port.
+           The value must be a comma-separated list that has 3 elements.
+
+           The first element must be a node-id which specifies the
+           physical switch.
+
+           If the second element is not empty, it is treated as the
+           identifier of the node connector corresponding to the physical
+           switch port. A string representation (in decimal) of the port
+           number for the physical switch port needs to be specified when
+           you specify the OpenFlow switch port.
+
+           If the third element is not empty, it is treated as the name of
+           the physical switch port.";
+        type string {
+            pattern ".+,.*,.*";
+        }
+    }
+    
+    typedef vlan-type {
+        description
+          "Describes the VLAN type supported by the VTN Manager.";
+
+        type enumeration {
+            enum VLAN {
+                description "Indicates the IEEE 802.1Q VLAN.";
+                value 33024;
+            }
+        }
+    }
+
+    grouping vlan-host-desc-set {
+        description
+          "Describes a set of `vlan-host-desc' values.";
+
+        list vlan-host-desc-list {
+            description
+              "Describes a list of unique `vlan-host-desc' values.";
+
+            key "host";
+            leaf host {
+                description "A pair of MAC address and VLAN ID.";
+                type host-desc;
+            }
+        }
+    }
+}
